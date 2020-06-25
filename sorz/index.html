@@ -6,7 +6,8 @@
 <div>
     <ul>
         <li data-sorz-tab="new" data-sorz-order="desc"><a href="#">new</a></li>
-        <li data-sorz-tab="cat" data-sorz-order="asc"><a href="#">category</a></li>
+        <!-- "tab" には カンマ区切りで、実施したいソートを指定、数が一致するように、"sort" にも並び順を設定 -->
+        <li data-sorz-tab="cat,new" data-sorz-order="asc,desc"><a href="#">category</a></li>
     </ul>
 
     <table>
@@ -54,21 +55,26 @@
 
 			    $(this).addClass('active');
 
-                var sortName = $(this).attr('data-sorz-tab');
-                var sortTargets = $('[data-sorz-sort="' + sortName + '"]').closest('[data-sorz="row"]');
-                var order = $(this).attr('data-sorz-order');
+                var sortNames = ($(this).attr('data-sorz-tab') || '').split(',').filter(function(v){ return !!v; }).reverse();
+			    var orders = ($(this).attr('data-sorz-order') || '').split(',').filter(function(v){ return !!v; }).reverse();
 
-                sortTargets.sort(function(a, b) {
-	                var aVal = $(a).find('[data-sorz-sort="' + sortName + '"]').find('[data-sorz-rank]').attr('data-sorz-rank');
-	                if (!aVal) aVal = $(a).find('[data-sorz-sort="' + sortName + '"]').text();
-	                var bVal = $(b).find('[data-sorz-sort="' + sortName + '"]').find('[data-sorz-rank]').attr('data-sorz-rank');
-	                if (!bVal) bVal = $(b).find('[data-sorz-sort="' + sortName + '"]').text();
+			    sortNames.forEach(function(sortName, index) {
+                    var order = orders[index] || '';
 
-	                var judge = order.toLocaleLowerCase() === 'asc' ? aVal > bVal : aVal < bVal;
-                	return judge ? 1 : -1;
+				    var sortTargets = $('[data-sorz-sort="' + sortName + '"]').closest('[data-sorz="row"]');
+
+				    sortTargets.sort(function(a, b) {
+					    var aVal = $(a).find('[data-sorz-sort="' + sortName + '"]').find('[data-sorz-rank]').attr('data-sorz-rank');
+					    if (!aVal) aVal = $(a).find('[data-sorz-sort="' + sortName + '"]').text();
+					    var bVal = $(b).find('[data-sorz-sort="' + sortName + '"]').find('[data-sorz-rank]').attr('data-sorz-rank');
+					    if (!bVal) bVal = $(b).find('[data-sorz-sort="' + sortName + '"]').text();
+
+					    var judge = order.toLocaleLowerCase() === 'asc' ? aVal > bVal : aVal < bVal;
+					    return judge ? 1 : -1;
+				    });
+
+				    sortTargets.parent().find('[data-sorz]').remove().end().append(sortTargets);
                 });
-
-			    sortTargets.parent().find('[data-sorz]').remove().end().append(sortTargets);
             });
         });
     }(window, jQuery);
